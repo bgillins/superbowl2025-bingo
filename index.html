@@ -79,34 +79,26 @@
       background: #0056b3;
     }
 
-    /* The bingo board is a grid with 5 columns */
     #bingoBoard {
       display: grid;
       grid-template-columns: repeat(5, 1fr);
       gap: 8px;
       margin-top: 1.5rem;
-      padding: 0.5rem;
+      aspect-ratio: 1;
+      width: 100%;
     }
 
-    /* Each bingo cell uses a container trick to remain square */
     .bingo-cell {
       position: relative;
       width: 100%;
-      padding-top: 100%; /* Creates a square by using 100% of the width as height */
+      padding-top: 100%; /* Creates a square aspect ratio */
       border: 2px solid #007bff;
       border-radius: 6px;
+      cursor: pointer;
+      user-select: none;
       background: #fff;
-      overflow: hidden;
-      transition: all 0.2s ease;
     }
 
-    /* When selected, change the background and border */
-    .bingo-cell.selected {
-      background: #ffd700;
-      border-color: #ffc107;
-    }
-
-    /* Inner content is absolutely positioned to fill the square */
     .bingo-cell-content {
       position: absolute;
       top: 0;
@@ -117,9 +109,21 @@
       align-items: center;
       justify-content: center;
       text-align: center;
+      padding: 5px;
       font-size: 0.9rem;
       font-weight: 500;
-      padding: 0.5rem;
+      transition: all 0.2s ease;
+    }
+
+    .bingo-cell:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
+    .bingo-cell.selected {
+      background: #ffd700;
+      color: #333;
+      border-color: #ffc107;
     }
 
     #logoutButton {
@@ -146,7 +150,6 @@
 
       .bingo-cell-content {
         font-size: 0.8rem;
-        padding: 0.25rem;
       }
     }
 
@@ -220,6 +223,7 @@
         const j = Math.floor(Math.random() * (i + 1));
         [available[i], available[j]] = [available[j], available[i]];
       }
+
       let card = [];
       for (let i = 0; i < 25; i++) {
         if (i === 12) {
@@ -234,6 +238,7 @@
 
     function checkForBingo() {
       const card = userData.bingoCard;
+
       // Check rows
       for (let row = 0; row < 5; row++) {
         let rowBingo = true;
@@ -245,6 +250,7 @@
         }
         if (rowBingo) return true;
       }
+
       // Check columns
       for (let col = 0; col < 5; col++) {
         let colBingo = true;
@@ -256,6 +262,7 @@
         }
         if (colBingo) return true;
       }
+
       // Check diagonals
       let diag1Bingo = true;
       let diag2Bingo = true;
@@ -263,6 +270,7 @@
         if (!card[i * 5 + i].selected) diag1Bingo = false;
         if (!card[i * 5 + (4 - i)].selected) diag2Bingo = false;
       }
+      
       return diag1Bingo || diag2Bingo;
     }
 
@@ -276,15 +284,18 @@
         if (cell.selected) {
           cellDiv.classList.add('selected');
         }
+        
         const contentDiv = document.createElement('div');
         contentDiv.className = 'bingo-cell-content';
         contentDiv.textContent = cell.text;
         cellDiv.appendChild(contentDiv);
+        
         cellDiv.addEventListener('click', () => {
           if (cell.text !== "FREE") {
             cell.selected = !cell.selected;
             cellDiv.classList.toggle('selected');
             saveUserData();
+
             if (checkForBingo() && !bingoAchieved) {
               bingoAchieved = true;
               alert(`BINGO! Congratulations, ${userData.username}!\n\nTake a screenshot and either:\n- Text it to 435-773-7295\n- Or find Brandon!\n\nGood luck!`);
