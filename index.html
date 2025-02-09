@@ -5,59 +5,92 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>SuperBowl 2025 Bingo</title>
   <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
     body {
       font-family: Arial, sans-serif;
-      padding: 1rem;
+      padding: 2rem;
       background: #f4f4f4;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
     }
-    /* Containers for the login form and bingo game */
+
     #loginForm, #bingoGame {
-      max-width: 500px;
-      margin: 2rem auto;
-      padding: 1rem;
+      width: 100%;
+      max-width: 600px;
+      margin: 1rem auto;
+      padding: 2rem;
       background: #fff;
-      border-radius: 4px;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      border-radius: 8px;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
     }
+
     h2 {
       text-align: center;
+      margin-bottom: 1.5rem;
+      color: #2c3e50;
+      font-size: 1.8rem;
     }
+
     label {
       display: block;
-      margin-top: 1rem;
+      margin-bottom: 0.5rem;
+      color: #34495e;
+      font-weight: 500;
     }
+
     input[type="text"] {
       width: 100%;
-      padding: 0.5rem;
+      padding: 0.75rem;
       font-size: 1rem;
-      margin-top: 0.5rem;
+      margin-bottom: 1.5rem;
+      border: 2px solid #e2e8f0;
+      border-radius: 6px;
+      transition: border-color 0.2s ease;
     }
+
+    input[type="text"]:focus {
+      outline: none;
+      border-color: #007bff;
+    }
+
     button {
       display: block;
       width: 100%;
-      padding: 0.7rem;
-      margin-top: 1.5rem;
-      font-size: 1rem;
+      padding: 1rem;
+      margin: 1rem 0;
+      font-size: 1.1rem;
+      font-weight: 600;
       background: #007bff;
       color: #fff;
       border: none;
-      border-radius: 4px;
+      border-radius: 6px;
       cursor: pointer;
+      transition: background-color 0.2s ease;
     }
+
     button:hover {
       background: #0056b3;
     }
-    /* Use CSS Grid for a persistent 5x5 layout */
+
     #bingoBoard {
       display: grid;
       grid-template-columns: repeat(5, 1fr);
-      gap: 5px;
-      margin-top: 1rem;
+      gap: 8px;
+      margin-top: 1.5rem;
+      padding: 0.5rem;
     }
+
     .bingo-cell {
-      height: 60px;
+      aspect-ratio: 1;
       border: 2px solid #007bff;
-      border-radius: 4px;
+      border-radius: 6px;
       display: flex;
       align-items: center;
       justify-content: center;
@@ -65,34 +98,71 @@
       cursor: pointer;
       user-select: none;
       font-size: 0.9rem;
-      padding: 2px;
+      padding: 0.5rem;
+      font-weight: 500;
+      transition: all 0.2s ease;
+      background: #fff;
     }
+
+    .bingo-cell:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+
     .bingo-cell.selected {
       background: #ffd700;
       color: #333;
+      border-color: #ffc107;
     }
+
     #logoutButton {
       background: #dc3545;
-      margin-top: 0;
+      margin-top: 1.5rem;
     }
+
     #logoutButton:hover {
       background: #c82333;
     }
-    /* Media query for smaller devices */
-    @media (max-width: 600px) {
+
+    @media (max-width: 768px) {
+      body {
+        padding: 1rem;
+      }
+
       #loginForm, #bingoGame {
-        max-width: 90%;
+        padding: 1.5rem;
+      }
+
+      h2 {
+        font-size: 1.5rem;
+      }
+
+      .bingo-cell {
+        font-size: 0.8rem;
+        padding: 0.25rem;
+      }
+    }
+
+    @media (max-width: 480px) {
+      body {
         padding: 0.5rem;
       }
+
+      #loginForm, #bingoGame {
+        padding: 1rem;
+      }
+
+      h2 {
+        font-size: 1.3rem;
+      }
+
       .bingo-cell {
-        height: 50px;
-        font-size: 0.8rem;
+        font-size: 0.7rem;
       }
     }
   </style>
 </head>
 <body>
-
   <!-- Login Form -->
   <div id="loginForm">
     <h2>Welcome to SuperBowl 2025 Bingo!</h2>
@@ -115,29 +185,25 @@
   </div>
 
   <script>
-    // List of vendors (the list you provided)
     const vendors = [
       "Pepsi", "Coca-Cola", "Budweiser", "Doritos", "M&M's", "Tide", "Amazon", "Google", "Apple",
       "Verizon", "AT&T", "Meta (Facebook)", "Disney", "Nike", "GM (General Motors)", "Hyundai",
       "Kia", "Toyota", "Ford", "Michelob Ultra", "Planters", "Pringles", "Squarespace", "Frito-Lay",
       "TurboTax", "E*Trade", "State Farm", "Progressive", "Geico", "NFL", "Paramount+", "Netflix",
       "Warner Bros.", "Marvel Studios", "Universal Pictures", "Samsung", "BMW", "Mercedes-Benz",
-      "Lexus", "Sony", "Doritos", "Heineken", "Uber", "Hellmann’s", "Avocados from Mexico",
+      "Lexus", "Sony", "Doritos", "Heineken", "Uber", "Hellmann's", "Avocados from Mexico",
       "Anheuser-Busch", "Booking.com", "DraftKings", "FanDuel", "YouTube TV", "Microsoft", "T-Mobile"
     ];
 
-    // Global variables for user data and bingo status
     let userData = null;
     let bingoAchieved = false;
 
-    // Save user data to localStorage
     function saveUserData() {
       if (userData) {
         localStorage.setItem('bingoUser', JSON.stringify(userData));
       }
     }
 
-    // Load user data from localStorage
     function loadUserData() {
       const data = localStorage.getItem('bingoUser');
       if (data) {
@@ -145,22 +211,18 @@
       }
     }
 
-    // Generate a random bingo card (5x5) with the center as FREE
     function generateBingoCard() {
       let available = vendors.slice();
-      // Shuffle the vendors array
       for (let i = available.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
         [available[i], available[j]] = [available[j], available[i]];
       }
 
       let card = [];
-      // Create 25 cells; cell index 12 is the center
       for (let i = 0; i < 25; i++) {
         if (i === 12) {
           card.push({ text: "FREE", selected: true });
         } else {
-          // Pop a vendor for each cell
           let vendor = available.pop() || "TBD";
           card.push({ text: vendor, selected: false });
         }
@@ -168,7 +230,6 @@
       return card;
     }
 
-    // Check if a bingo (full row, column, or diagonal) is achieved
     function checkForBingo() {
       const card = userData.bingoCard;
 
@@ -196,30 +257,17 @@
         if (colBingo) return true;
       }
 
-      // Check diagonal (top-left to bottom-right)
+      // Check diagonals
       let diag1Bingo = true;
-      for (let i = 0; i < 5; i++) {
-        if (!card[i * 5 + i].selected) {
-          diag1Bingo = false;
-          break;
-        }
-      }
-      if (diag1Bingo) return true;
-
-      // Check diagonal (top-right to bottom-left)
       let diag2Bingo = true;
       for (let i = 0; i < 5; i++) {
-        if (!card[i * 5 + (4 - i)].selected) {
-          diag2Bingo = false;
-          break;
-        }
+        if (!card[i * 5 + i].selected) diag1Bingo = false;
+        if (!card[i * 5 + (4 - i)].selected) diag2Bingo = false;
       }
-      if (diag2Bingo) return true;
-
-      return false;
+      
+      return diag1Bingo || diag2Bingo;
     }
 
-    // Render the bingo card on the page
     function renderBingoCard() {
       const boardDiv = document.getElementById('bingoBoard');
       boardDiv.innerHTML = '';
@@ -231,14 +279,12 @@
           cellDiv.classList.add('selected');
         }
         cellDiv.textContent = cell.text;
-        // Toggle selection on click (skip the FREE cell)
         cellDiv.addEventListener('click', () => {
           if (cell.text !== "FREE") {
             cell.selected = !cell.selected;
             cellDiv.classList.toggle('selected');
             saveUserData();
 
-            // Check for a bingo after every click
             if (checkForBingo() && !bingoAchieved) {
               bingoAchieved = true;
               alert(`Bingo! Congratulations, ${userData.username}!`);
@@ -249,26 +295,22 @@
       });
     }
 
-    // Handle the login form submission
     document.getElementById('userForm').addEventListener('submit', (e) => {
       e.preventDefault();
       const username = document.getElementById('username').value.trim();
       const details = document.getElementById('details').value.trim();
       if (username && details) {
-        // Initialize user data and generate a bingo card
         userData = {
           username,
           details,
           bingoCard: generateBingoCard()
         };
-        // Reset bingo acknowledgement flag
         bingoAchieved = false;
         saveUserData();
         showGame();
       }
     });
 
-    // Show the bingo game (hide login form, display game area)
     function showGame() {
       document.getElementById('loginForm').style.display = 'none';
       document.getElementById('bingoGame').style.display = 'block';
@@ -277,17 +319,14 @@
       renderBingoCard();
     }
 
-    // Logout functionality (clear localStorage and reload the page)
     document.getElementById('logoutButton').addEventListener('click', () => {
       localStorage.removeItem('bingoUser');
       location.reload();
     });
 
-    // When the page loads, check if user data is already saved
     window.onload = function() {
       loadUserData();
       if (userData) {
-        // Reset the bingo flag in case a game was already in progress
         bingoAchieved = false;
         showGame();
       }
