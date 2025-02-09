@@ -46,15 +46,15 @@
     button:hover {
       background: #0056b3;
     }
+    /* Use CSS Grid for a persistent 5x5 layout */
     #bingoBoard {
-      display: flex;
-      flex-wrap: wrap;
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 10px;
       margin-top: 1rem;
     }
     .bingo-cell {
-      width: 18%;
       height: 80px;
-      margin: 1%;
       border: 2px solid #007bff;
       border-radius: 4px;
       display: flex;
@@ -112,8 +112,9 @@
       "Anheuser-Busch", "Booking.com", "DraftKings", "FanDuel", "YouTube TV", "Microsoft", "T-Mobile"
     ];
 
-    // Global variable for user data
+    // Global variables for user data and bingo status
     let userData = null;
+    let bingoAchieved = false;
 
     // Save user data to localStorage
     function saveUserData() {
@@ -130,27 +131,78 @@
       }
     }
 
-    // Generate a random bingo card (5x5)
+    // Generate a random bingo card (5x5) with the center as FREE
     function generateBingoCard() {
-      // Make a copy of vendors and shuffle them
       let available = vendors.slice();
+      // Shuffle the vendors array
       for (let i = available.length - 1; i > 0; i--) {
         const j = Math.floor(Math.random() * (i + 1));
         [available[i], available[j]] = [available[j], available[i]];
       }
 
       let card = [];
-      // Create 25 cells; index 12 (center) will be FREE
+      // Create 25 cells; cell index 12 is the center
       for (let i = 0; i < 25; i++) {
         if (i === 12) {
           card.push({ text: "FREE", selected: true });
         } else {
-          // Remove one vendor for each cell
+          // Pop a vendor for each cell
           let vendor = available.pop() || "TBD";
           card.push({ text: vendor, selected: false });
         }
       }
       return card;
+    }
+
+    // Check if a bingo (full row, column, or diagonal) is achieved
+    function checkForBingo() {
+      const card = userData.bingoCard;
+
+      // Check rows
+      for (let row = 0; row < 5; row++) {
+        let rowBingo = true;
+        for (let col = 0; col < 5; col++) {
+          if (!card[row * 5 + col].selected) {
+            rowBingo = false;
+            break;
+          }
+        }
+        if (rowBingo) return true;
+      }
+
+      // Check columns
+      for (let col = 0; col < 5; col++) {
+        let colBingo = true;
+        for (let row = 0; row < 5; row++) {
+          if (!card[row * 5 + col].selected) {
+            colBingo = false;
+            break;
+          }
+        }
+        if (colBingo) return true;
+      }
+
+      // Check diagonal (top-left to bottom-right)
+      let diag1Bingo = true;
+      for (let i = 0; i < 5; i++) {
+        if (!card[i * 5 + i].selected) {
+          diag1Bingo = false;
+          break;
+        }
+      }
+      if (diag1Bingo) return true;
+
+      // Check diagonal (top-right to bottom-left)
+      let diag2Bingo = true;
+      for (let i = 0; i < 5; i++) {
+        if (!card[i * 5 + (4 - i)].selected) {
+          diag2Bingo = false;
+          break;
+        }
+      }
+      if (diag2Bingo) return true;
+
+      return false;
     }
 
     // Render the bingo card on the page
@@ -165,12 +217,18 @@
           cellDiv.classList.add('selected');
         }
         cellDiv.textContent = cell.text;
-        // Toggle selection on click (but not for FREE cell)
+        // Toggle selection on click (skip the FREE cell)
         cellDiv.addEventListener('click', () => {
           if (cell.text !== "FREE") {
             cell.selected = !cell.selected;
             cellDiv.classList.toggle('selected');
             saveUserData();
+
+            // Check for a bingo after every click
+            if (checkForBingo() && !bingoAchieved) {
+              bingoAchieved = true;
+              alert(`Bingo! Congratulations, ${userData.username}!`);
+            }
           }
         });
         boardDiv.appendChild(cellDiv);
@@ -189,6 +247,8 @@
           details,
           bingoCard: generateBingoCard()
         };
+        // Reset bingo acknowledgement flag
+        bingoAchieved = false;
         saveUserData();
         showGame();
       }
@@ -213,6 +273,8 @@
     window.onload = function() {
       loadUserData();
       if (userData) {
+        // Reset the bingo flag in case a game was already in progress
+        bingoAchieved = false;
         showGame();
       }
     };
